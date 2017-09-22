@@ -1,5 +1,5 @@
 """
-Entrypoint module, in case you use `python -mchallenge_manager`.
+Entrypoint module, in case you use `python -m challenge_manager`.
 
 
 Why does this file exist, and why __main__? For more info, read:
