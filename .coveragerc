@@ -1,0 +1,16 @@
+[paths]
+source =
+   src/challenge_manager
+   */site-packages/challenge_manager
+
+[run]
+branch = true
+source =
+    challenge_manager
+    tests
+parallel = true
+
+[report]
+show_missing = true
+precision = 2
+omit = *migrations*
