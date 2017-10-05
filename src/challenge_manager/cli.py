@@ -17,7 +17,11 @@ Why does this file exist, and why not put this in __main__?
 import click
 
 
-@click.command()
-@click.argument('names', nargs=-1)
-def main(names):
-    click.echo(repr(names))
+@click.group()
+def cli():
+  pass
+
+@cli.command()
+@click.argument('files', nargs=-1, type=click.Path(exists=True))
+def upload(files):
+  click.echo('upload')
