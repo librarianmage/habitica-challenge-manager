@@ -18,10 +18,14 @@ import click
 
 
 @click.group()
-def cli():
-  pass
+@click.option('-u', '--id', 'userId', prompt=True)
+@click.option('-k', '--key', 'apiKey', prompt=True, hide_input=True)
+@click.pass_context
+def cli(ctx):
+  ctx.obj['']
 
 @cli.command()
 @click.argument('files', nargs=-1, type=click.Path(exists=True))
-def upload(files):
+@click.pass_context
+def upload(ctx, files):
   click.echo('upload')

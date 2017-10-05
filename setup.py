@@ -78,7 +78,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'habitica-challenge-manager = challenge_manager.cli:cli',
+            'challenge-manager = challenge_manager.cli:cli',
         ]
     },
 )
