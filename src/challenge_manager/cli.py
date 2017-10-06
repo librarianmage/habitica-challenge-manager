@@ -14,13 +14,67 @@ Why does this file exist, and why not put this in __main__?
 
   Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
-import click, re
+import click, re, requests
+from strictyaml import load, Map, MapPattern, Int, Float, Str, Regex, Enum, Bool, Seq, Optional, Datetime, YAMLValidationError
+from datetime import datetime
+
+UUID_REGEX = '[a-zA-Z0-9]{8}-(?:[a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}'
+API_BASE = 'https://habitica.com/api/v3/'
+
+task_schema = {
+  "text": Str(),
+  Optional("alias"): Str(),
+  Optional("attribute"): Enum(["str", "int", "per", "con"]),
+  Optional("notes"): Str(),
+  Optional("priority"): Float()
+}
+
+todo_schema = task_schema.copy()
+todo_schema.update({
+  Optional("date"): Datetime()
+})
+
+daily_schema = task_schema.copy()
+daily_schema.update({
+  Optional("frequency"): Enum(["daily", "weekly", "montly", "yearly"]),
+  Optional("repeat"): MapPattern(Str(), Bool()),
+  Optional("everyX"): Int(),
+  Optional("startDate"): Datetime()
+})
+
+habit_schema = task_schema.copy()
+habit_schema.update({
+  Optional("up"): Bool(),
+  Optional("down"): Bool()
+})
+
+reward_schema = task_schema.copy()
+reward_schema.update({
+  Optional("value"): Float()
+})
+
+challenge_schema = Map({
+  "challenge": Map({
+    "groupId": Regex(UUID_REGEX),
+    "name": Str(),
+    "shortName": Str(),
+    Optional("summary"): Str(),
+    Optional("description"): Str(),
+    Optional("prize"): Int()
+  }),
+  Optional("tasks"): Map({
+    Optional("habits"): Seq(Map(habit_schema)),
+    Optional("dailies"): Seq(Map(daily_schema)),
+    Optional("todos"): Seq(Map(todo_schema)),
+    Optional("rewards"): Seq(Map(reward_schema))
+  })
+})
 
 class HabiticaUUIDParamType(click.ParamType):
   name = "UUID"
   
   def convert(self, value, param, ctx):
-    regex = re.compile('[a-zA-Z0-9]{8}-(?:[a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}')
+    regex = re.compile(UUID_REGEX)
     try:
       assert regex.fullmatch(value) is not None
       return value
@@ -45,4 +99,13 @@ def cli(ctx, userID, apiKey):
 @click.argument('files', nargs=-1, type=click.Path(exists=True))
 @click.pass_context
 def upload(ctx, files):
-  click.echo('uploading to user %s' % ctx.obj['AUTH']['x-api-user'])
+  with open(files[0]) as yamlData:
+    data = yamlData.read()
+  challenge = load(data, challenge_schema)
+  challengeData = challenge.data
+  challengeMeta = challengeData['challenge']
+  click.echo(challengeMeta.items())
+  createdChallenge = requests.post(API_BASE + 'challenges', headers=ctx.obj['AUTH'], json={
+    challenge: {key: challengeMeta[key] for key in challengeMeta.iterkeys()}
+  })
+  click.echo(createdChallenge.status)

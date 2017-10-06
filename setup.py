@@ -70,6 +70,7 @@ setup(
     ],
     install_requires=[
         'click',
+        'strictyaml'
     ],
     extras_require={
         # eg:
