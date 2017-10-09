@@ -55,7 +55,7 @@ reward_schema.update({
 
 challenge_schema = Map({
   "challenge": Map({
-    "groupId": Regex(UUID_REGEX),
+    "group": Regex(UUID_REGEX),
     "name": Str(),
     "shortName": Str(),
     Optional("summary"): Str(),
@@ -63,10 +63,10 @@ challenge_schema = Map({
     Optional("prize"): Int()
   }),
   Optional("tasks"): Map({
-    Optional("habits"): Seq(Map(habit_schema)),
-    Optional("dailies"): Seq(Map(daily_schema)),
-    Optional("todos"): Seq(Map(todo_schema)),
-    Optional("rewards"): Seq(Map(reward_schema))
+    Optional("habit"): Seq(Map(habit_schema)),
+    Optional("daily"): Seq(Map(daily_schema)),
+    Optional("todo"): Seq(Map(todo_schema)),
+    Optional("reward"): Seq(Map(reward_schema))
   })
 })
 
@@ -101,11 +101,18 @@ def cli(ctx, userID, apiKey):
 def upload(ctx, files):
   with open(files[0]) as yamlData:
     data = yamlData.read()
-  challenge = load(data, challenge_schema)
-  challengeData = challenge.data
-  challengeMeta = challengeData['challenge']
-  click.echo(challengeMeta.items())
-  createdChallenge = requests.post(API_BASE + 'challenges', headers=ctx.obj['AUTH'], json={
-    challenge: {key: challengeMeta[key] for key in challengeMeta.iterkeys()}
-  })
-  click.echo(createdChallenge.status)
+  challengeYaml = load(data, challenge_schema)
+  challengeData = challengeYaml.data
+  
+  # create challenge 
+  challengeInfo = challengeData['challenge']
+  createdChallenge = requests.post(API_BASE + 'challenges', headers=ctx.obj['AUTH'], data=challengeInfo)
+  challenge = createdChallenge.json()
+  
+  # create tasks
+  for taskType, tasks in challengeData['tasks'].items():
+    for task in tasks:
+      click.echo('%(taskType)s: %(task)s' % {
+        'taskType': taskType,
+        'task': task['text']
+      })
