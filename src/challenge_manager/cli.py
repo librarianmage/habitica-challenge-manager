@@ -3,59 +3,11 @@ Module that contains the command line app.
 """
 import click
 import requests
-from strictyaml import load, Map, MapPattern, Int, Float, Str, Regex, Enum, Bool, Seq, Optional, Datetime
+from strictyaml import load
+from challenge_manager.challengeSchema import challengeSchema
 
 UUID_REGEX = '[a-zA-Z0-9]{8}-(?:[a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}'
 API_BASE = 'https://habitica.com/api/v3/'
-
-task_schema = {
-    "text": Str(),
-    Optional("alias"): Str(),
-    Optional("attribute"): Enum(["str", "int", "per", "con"]),
-    Optional("notes"): Str(),
-    Optional("priority"): Float()
-}
-
-todo_schema = task_schema.copy()
-todo_schema.update({
-    Optional("date"): Datetime()
-})
-
-daily_schema = task_schema.copy()
-daily_schema.update({
-    Optional("frequency"): Enum(["daily", "weekly", "montly", "yearly"]),
-    Optional("repeat"): MapPattern(Str(), Bool()),
-    Optional("everyX"): Int(),
-    Optional("startDate"): Datetime()
-})
-
-habit_schema = task_schema.copy()
-habit_schema.update({
-    Optional("up"): Bool(),
-    Optional("down"): Bool()
-})
-
-reward_schema = task_schema.copy()
-reward_schema.update({
-    Optional("value"): Float()
-})
-
-challenge_schema = Map({
-    "challenge": Map({
-        "group": Regex(UUID_REGEX),
-        "name": Str(),
-        "shortName": Str(),
-        Optional("summary"): Str(),
-        Optional("description"): Str(),
-        Optional("prize"): Int()
-    }),
-    Optional("tasks"): Map({
-        Optional("habit"): Seq(Map(habit_schema)),
-        Optional("daily"): Seq(Map(daily_schema)),
-        Optional("todo"): Seq(Map(todo_schema)),
-        Optional("reward"): Seq(Map(reward_schema))
-    })
-})
 
 
 @click.group()
@@ -65,8 +17,8 @@ challenge_schema = Map({
 def cli(ctx, userID, apiKey):
     ctx.obj = {
         'AUTH': {
-            'x-api-user': userID.urn,
-            'x-api-key': apiKey.urn
+            'x-api-user': str(userID),
+            'x-api-key': str(urn)
         }
     }
 
@@ -77,14 +29,14 @@ def cli(ctx, userID, apiKey):
 def upload(ctx, files):
     with open(files[0]) as yamlData:
         data = yamlData.read()
-    challengeYaml = load(data, challenge_schema)
+    challengeYaml = load(data, challengeSchema)
     challengeData = challengeYaml.data
 
     # create challenge
     challengeInfo = challengeData['challenge']
     createdChallenge = requests.post(API_BASE + 'challenges', headers=ctx.obj['AUTH'], data=challengeInfo)
     challenge = createdChallenge.json()
-    click.echo(Str(challenge))
+    click.echo(str(challenge))
 
     # create tasks
     for taskType, tasks in challengeData['tasks'].items():
