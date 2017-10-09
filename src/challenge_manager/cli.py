@@ -2,7 +2,6 @@
 Module that contains the command line app.
 """
 import click
-import re
 import requests
 from strictyaml import load, Map, MapPattern, Int, Float, Str, Regex, Enum, Bool, Seq, Optional, Datetime
 
@@ -59,29 +58,15 @@ challenge_schema = Map({
 })
 
 
-class HabiticaUUIDParamType(click.ParamType):
-    name = "UUID"
-
-    def convert(self, value, param, ctx):
-        regex = re.compile(UUID_REGEX)
-        try:
-            assert regex.fullmatch(value) is not None
-            return value
-        except AssertionError:
-            self.fail('%s is not a valid UUID' % value, param, ctx)
-
-
-HabiticaUUID = HabiticaUUIDParamType()
-
 @click.group()
-@click.option('-u', '--id', 'userID', type=HabiticaUUID, prompt='User ID')
-@click.option('-k', '--key', 'apiKey', type=HabiticaUUID, prompt='API Key')
+@click.option('-u', '--id', 'userID', type=click.UUID, prompt='User ID')
+@click.option('-k', '--key', 'apiKey', type=click.UUID, prompt='API Key')
 @click.pass_context
 def cli(ctx, userID, apiKey):
     ctx.obj = {
         'AUTH': {
-            'x-api-user': userID,
-            'x-api-key': apiKey
+            'x-api-user': userID.urn,
+            'x-api-key': apiKey.urn
         }
     }
 
