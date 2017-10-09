@@ -70,8 +70,8 @@ class HabiticaUUIDParamType(click.ParamType):
         except AssertionError:
             self.fail('%s is not a valid UUID' % value, param, ctx)
 
-HabiticaUUID = HabiticaUUIDParamType()
 
+HabiticaUUID = HabiticaUUIDParamType()
 
 @click.group()
 @click.option('-u', '--id', 'userID', type=HabiticaUUID, prompt='User ID')
