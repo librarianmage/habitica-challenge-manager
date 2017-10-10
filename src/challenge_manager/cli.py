@@ -3,8 +3,9 @@ Module that contains the command line app.
 """
 import click
 from strictyaml import load
-from challenge_manager.challengeSchema import challengeSchema
+
 from challenge_manager.challenge import Challenge
+from challenge_manager.challengeSchema import challengeSchema
 
 
 @click.group()

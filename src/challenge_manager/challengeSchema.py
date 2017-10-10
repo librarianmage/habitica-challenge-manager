@@ -1,12 +1,22 @@
 """
 Module that contains challenge schema
 """
-from strictyaml import Map, MapPattern, Int, Float, Str, Enum, Bool, Seq, Optional, Datetime
+import sys
+import uuid
+
+from strictyaml import Bool
+from strictyaml import Datetime
+from strictyaml import Enum
+from strictyaml import Float
+from strictyaml import Int
+from strictyaml import Map
+from strictyaml import MapPattern
+from strictyaml import Optional
+from strictyaml import Seq
+from strictyaml import Str
 from strictyaml.exceptions import raise_exception
 from strictyaml.representation import YAML
 from strictyaml.scalar import Scalar
-import uuid
-import sys
 
 if sys.version_info[0] == 3:
     unicode = str

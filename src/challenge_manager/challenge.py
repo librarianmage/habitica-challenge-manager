@@ -1,6 +1,8 @@
-import requests
-from challenge_manager.constants import API_BASE, TASK_TYPES
 import click
+import requests
+
+from challenge_manager.constants import API_BASE
+from challenge_manager.constants import TASK_TYPES
 
 
 class apiError(Exception):
