@@ -56,7 +56,7 @@ rewardSchema.update({
 
 challengeSchema = Map({
     "challenge": Map({
-        "group": UUID(),
+        "group": UUID() | Str(),
         "name": Str(),
         "shortName": Str(),
         Optional("summary"): Str(),
@@ -64,9 +64,9 @@ challengeSchema = Map({
         Optional("prize"): Int()
     }),
     Optional("tasks"): Map({
-        Optional("habit"): Seq(Map(habitSchema)),
-        Optional("daily"): Seq(Map(dailySchema)),
-        Optional("todo"): Seq(Map(todoSchema)),
-        Optional("reward"): Seq(Map(rewardSchema))
+        Optional("habits"): Seq(Map(habitSchema)),
+        Optional("dailys"): Seq(Map(dailySchema)),
+        Optional("todos"): Seq(Map(todoSchema)),
+        Optional("rewards"): Seq(Map(rewardSchema))
     })
 })
