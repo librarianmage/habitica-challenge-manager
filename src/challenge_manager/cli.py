@@ -6,6 +6,7 @@ from strictyaml import load
 
 from challenge_manager.challenge import Challenge
 from challenge_manager.challengeSchema import challengeSchema
+from challenge_manager.constants import URL
 
 
 @click.group()
@@ -40,4 +41,4 @@ def upload(ctx, files):
     for taskType, tasks in challengeData['tasks'].items():
         click.echo('adding {0}...'.format(taskType))
         challenge.setTasksOfType(taskType, tasks)
-        click.echo('done')
+        click.echo('created task at {0}/challenges/{1}'.format(URL, challenge.id))
