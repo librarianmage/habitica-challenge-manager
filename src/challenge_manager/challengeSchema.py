@@ -14,35 +14,40 @@ from strictyaml import MapPattern
 from strictyaml import Optional
 from strictyaml import Seq
 from strictyaml import Str
-from strictyaml.exceptions import raise_exception
 from strictyaml.representation import YAML
-from strictyaml.scalar import Scalar
+from strictyaml.scalar import ScalarValidator
 
 if sys.version_info[0] == 3:
     unicode = str
 
 
-class UUID(Scalar):
+class UUID(ScalarValidator):
     def validate_scalar(self, chunk, value=None):
         uuidStr = unicode(chunk.contents) if value is None else value
         try:
-            id = uuid.UUID(uuidStr)
+            id = str(uuid.UUID(uuidStr))
         except:
-            raise_exception("when expecting a UUID", "did not find a valid UUID", chunk)
+            chunk.expected_but_found(
+                "when expecting a UUID",
+            )
         return YAML(id, uuidStr, chunk=chunk)
 
+class isoDatetime(Datetime):
+    def validate_scalar(self, chunk):
+        datetimeDate = super(isoDatetime, self).validate_scalar(chunk)
+        return datetimeDate.isoformat()
 
 taskSchema = {
     "text": Str(),
     Optional("alias"): Str(),
     Optional("attribute"): Enum(["str", "int", "per", "con"]),
     Optional("notes"): Str(),
-    Optional("priority"): Float()
+    Optional("priority"): Enum([0.1,1,1.5,2], item_validator=Float())
 }
 
 todoSchema = taskSchema.copy()
 todoSchema.update({
-    Optional("date"): Datetime()
+    Optional("date"): isoDatetime()
 })
 
 dailySchema = taskSchema.copy()
@@ -50,13 +55,14 @@ dailySchema.update({
     Optional("frequency"): Enum(["daily", "weekly", "montly", "yearly"]),
     Optional("repeat"): MapPattern(Str(), Bool()),
     Optional("everyX"): Int(),
-    Optional("startDate"): Datetime()
+    Optional("startDate"): isoDatetime()
 })
 
 habitSchema = taskSchema.copy()
 habitSchema.update({
     Optional("up"): Bool(),
-    Optional("down"): Bool()
+    Optional("down"): Bool(),
+    Optional("frequency"): Enum(["daily", "weekly", "monthly", "yearly"])
 })
 
 rewardSchema = taskSchema.copy()
@@ -80,3 +86,5 @@ challengeSchema = Map({
         Optional("rewards"): Seq(Map(rewardSchema))
     })
 })
+
+challengeSchemaList = Seq(challengeSchema)
