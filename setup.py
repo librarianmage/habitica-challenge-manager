@@ -70,6 +70,9 @@ setup(
     ],
     install_requires=[
         'click',
+        'strictyaml',
+        'bidict',
+        'requests'
     ],
     extras_require={
         # eg:
@@ -78,7 +81,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'habitica-challenge-manager = challenge_manager.cli:main',
+            'challenge-manager = challenge_manager.cli:cli',
         ]
     },
 )
